@@ -1,20 +1,20 @@
--module(task3).
+-module(task2).
 -export([main/4, producer/3, conveyor/1, trucks/2]).
 
 
 
-launchConveyers(0, _, _, _ ) ->
-    exit;
-launchConveyers(Num_conveyor, Num_packages_per_conveyor, Default_Truck_capacity, Max_package_size) ->
+launchConveyors(0, _, _, _ ) ->
+    ok;
+launchConveyors(Num_conveyor, Num_packages_per_conveyor, Default_Truck_capacity, Max_package_size) ->
     Pid_trucks = spawn(?MODULE, trucks, [Default_Truck_capacity, Default_Truck_capacity]),
-    Pid_conveyer = spawn(?MODULE, conveyor, [Pid_trucks]),
-    spawn(?MODULE, producer, [Num_packages_per_conveyor, Pid_conveyer, Max_package_size]),
-    launchConveyers(Num_conveyor-1, Num_packages_per_conveyor, Default_Truck_capacity, Max_package_size).
+    Pid_conveyor = spawn(?MODULE, conveyor, [Pid_trucks]),
+    spawn(?MODULE, producer, [Num_packages_per_conveyor, Pid_conveyor, Max_package_size]),
+    launchConveyors(Num_conveyor-1, Num_packages_per_conveyor, Default_Truck_capacity, Max_package_size).
 
 
 
 producer(0, _, _) ->
-    exit;
+    ok;
 producer(Num_packages_per_conveyor, Pid, Max_package_size) ->
     Package_size = rand:uniform(Max_package_size),
     io:format("Producer ~p, sending package with size, ~p, to conveyor ~p.~n", [self(), Package_size, Pid]),
@@ -37,8 +37,8 @@ trucks(Truck_capacity, Default_Truck_capacity) ->
             io:format("Truck depot ~p, received from conveyor ~p.~n", [self(), Pid]),
             if 
                 Package_size > Truck_capacity -> 
-                    io:format("Package exceeds truck capacity by: ~p. New truck needed~n", [Package_size - Truck_capacity]),
-                    timer:sleep(1000),
+                    io:format("Package exceeds truck capacity by: ~p.~n", [Package_size - Truck_capacity]),
+                    io:format("Truck can't take this package, new truck needed.~n"),
                     trucks(Default_Truck_capacity, Default_Truck_capacity);
                 Truck_capacity >= Package_size ->
                     io:format("Truck has current capacity: ~p.~n", [Truck_capacity - Package_size]),
@@ -47,7 +47,21 @@ trucks(Truck_capacity, Default_Truck_capacity) ->
     end.
 
 
-main(Num_conveyor, Num_packages_per_conveyor, Truck_capacity, Max_package_size ) ->
-    launchConveyers(Num_conveyor, Num_packages_per_conveyor, Truck_capacity, Max_package_size).
+validate_params(Num_conveyor, Num_packages, Truck_capacity, Max_package_size) ->
+    if 
+        Num_conveyor > 0,
+        Num_packages > 0,
+        Truck_capacity > 0,
+        Max_package_size > 0 ->
+            ok;
+        true ->
+            {error}
+    end.
 
-
+main(Num_conveyor, Num_packages_per_conveyor, Truck_capacity, Max_package_size) ->
+    case validate_params(Num_conveyor, Num_packages_per_conveyor, Truck_capacity, Max_package_size) of
+        ok ->
+            launchConveyors(Num_conveyor, Num_packages_per_conveyor, Truck_capacity, Max_package_size);
+        {error, bad_input} ->
+            io:format("Invalid parameters provided.~n")
+    end.

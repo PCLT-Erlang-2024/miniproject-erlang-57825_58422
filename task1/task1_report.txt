@@ -1,0 +1,7 @@
+When executing the task, all parameters are first validated to check for inconsistencies.
+
+We then initialize the trucks, conveyors and producers, which pass messages according to the actor model, ensuring the packages are passed sequencially through the producer, then the conveyor belt, then the truck. This avoids deadlocks, since there are no circular dependencies in the asynchronous communication.
+
+We ensure termination using the base case for the launchConveyors and producer methods, in order to guarantee the processes finish correctly after being called the specified number of times.
+
+All of this keeps the flow correct and consistent throught the execution.

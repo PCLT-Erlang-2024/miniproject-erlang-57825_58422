@@ -1,0 +1,15 @@
+When executing the task, all parameters are first validated to check for inconsistencies.
+
+We then initialize the trucks, conveyors and producers, which pass messages according to the actor model, ensuring the packages are passed sequencially through the producer, then the conveyor belt, then the truck. This avoids deadlocks, since there are no circular dependencies in the asynchronous communication.
+
+We ensure termination using the base case for the launchConveyors and producer methods, in order to guarantee the processes finish correctly after being called the specified number of times.
+
+All of this keeps the flow correct and consistent throught the execution.
+
+For task2, we included a Max_package_size parameter, which specifies the maximum size the packages can have. We then send packages with sizes varying from 1 to Max_package_size.
+
+We also added a truck capacity check whenever receiving a package to check if the truck has enough space to fit the new package with a random size.
+
+The program logs the flow of packages, including whether a truck has received and stored a package or if it didn't have enough space and had to be replaced by another truck.
+
+For task3, we included a sleep time on the trucks for whenever the truck doesn't have enough capacity to store a new package and has to be replaced. This mimics the effect of having to wait for a bit for the truck to be replaced for another one with enough capacity to accept the new package.

@@ -3,18 +3,18 @@
 
 
 
-launchConveyers(0, _, _) ->
-    exit;
-launchConveyers(Num_conveyor, Num_packages_per_conveyor, Default_Truck_capacity) ->
+launchConveyors(0, _, _) ->
+    ok;
+launchConveyors(Num_conveyor, Num_packages_per_conveyor, Default_Truck_capacity) ->
     Pid_trucks = spawn(?MODULE, trucks, [Default_Truck_capacity, Default_Truck_capacity]),
-    Pid_conveyer = spawn(?MODULE, conveyor, [Pid_trucks]),
-    spawn(?MODULE, producer, [Num_packages_per_conveyor, Pid_conveyer]),
-    launchConveyers(Num_conveyor-1, Num_packages_per_conveyor, Default_Truck_capacity).
+    Pid_conveyor = spawn(?MODULE, conveyor, [Pid_trucks]),
+    spawn(?MODULE, producer, [Num_packages_per_conveyor, Pid_conveyor]),
+    launchConveyors(Num_conveyor-1, Num_packages_per_conveyor, Default_Truck_capacity).
 
 
 
 producer(0, _) ->
-    exit;
+    ok;
 producer(Num_packages_per_conveyor, Pid) ->
     io:format("Producer ~p, sending package to conveyor ~p.~n", [self(), Pid]),
     Pid ! {self(), package},
@@ -41,7 +41,20 @@ trucks(Truck_capacity, Default_Truck_capacity) ->
     end.
 
 
+validate_params(Num_conveyor, Num_packages, Truck_capacity) ->
+    if 
+        Num_conveyor > 0,
+        Num_packages > 0,
+        Truck_capacity > 0 ->
+            ok;
+        true ->
+            {error}
+    end.
+
 main(Num_conveyor, Num_packages_per_conveyor, Truck_capacity) ->
-    launchConveyers(Num_conveyor, Num_packages_per_conveyor, Truck_capacity).
-
-
+    case validate_params(Num_conveyor, Num_packages_per_conveyor, Truck_capacity) of
+        ok ->
+            launchConveyors(Num_conveyor, Num_packages_per_conveyor, Truck_capacity);
+        {error} ->
+            io:format("Invalid parameters provided.~n")
+    end.
