@@ -5,11 +5,11 @@
 
 launchConveyers(0, _, _) ->
     exit;
-launchConveyers(Num_conveyor, Num_packages_per_conveyor, Deafault_Truck_capacity) ->
-    Pid_trucks = spawn(?MODULE, trucks, [Deafault_Truck_capacity, Deafault_Truck_capacity]),
+launchConveyers(Num_conveyor, Num_packages_per_conveyor, Default_Truck_capacity) ->
+    Pid_trucks = spawn(?MODULE, trucks, [Default_Truck_capacity, Default_Truck_capacity]),
     Pid_conveyer = spawn(?MODULE, conveyor, [Pid_trucks]),
     spawn(?MODULE, producer, [Num_packages_per_conveyor, Pid_conveyer]),
-    launchConveyers(Num_conveyor-1, Num_packages_per_conveyor, Deafault_Truck_capacity).
+    launchConveyers(Num_conveyor-1, Num_packages_per_conveyor, Default_Truck_capacity).
 
 
 
@@ -21,7 +21,6 @@ producer(Num_packages_per_conveyor, Pid) ->
     producer(Num_packages_per_conveyor-1, Pid),
     exit.
 
-
 conveyor(Pid_trucks) -> 
     receive
         {Pid, package} -> 
@@ -31,14 +30,14 @@ conveyor(Pid_trucks) ->
     end.
 
 
-trucks(0, Deafault_Truck_capacity) -> 
+trucks(0, Default_Truck_capacity) -> 
     io:format("Truck can't take this package new truck needed.~n"),
-    trucks(Deafault_Truck_capacity, Deafault_Truck_capacity);
-trucks(Truck_capacity, Deafault_Truck_capacity) ->
+    trucks(Default_Truck_capacity, Default_Truck_capacity);
+trucks(Truck_capacity, Default_Truck_capacity) ->
     receive 
         {Pid, package} -> 
             io:format("Truck depot ~p, received from conveyor ~p.~n", [self(), Pid]),
-            trucks(Truck_capacity-1, Deafault_Truck_capacity)
+            trucks(Truck_capacity-1, Default_Truck_capacity)
     end.
 
 

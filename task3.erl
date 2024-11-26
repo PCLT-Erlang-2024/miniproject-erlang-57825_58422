@@ -1,4 +1,4 @@
--module(task2).
+-module(task3).
 -export([main/4, producer/3, conveyor/1, trucks/2]).
 
 
@@ -37,8 +37,8 @@ trucks(Truck_capacity, Default_Truck_capacity) ->
             io:format("Truck depot ~p, received from conveyor ~p.~n", [self(), Pid]),
             if 
                 Package_size > Truck_capacity -> 
-                    io:format("Package exceeds truck capacity by: ~p.~n", [Package_size - Truck_capacity]),
-                    io:format("Truck can't take this package, new truck needed.~n"),
+                    io:format("Package exceeds truck capacity by: ~p. New truck needed~n", [Package_size - Truck_capacity]),
+                    timer:sleep(1000),
                     trucks(Default_Truck_capacity, Default_Truck_capacity);
                 Truck_capacity >= Package_size ->
                     io:format("Truck has current capacity: ~p.~n", [Truck_capacity - Package_size]),
